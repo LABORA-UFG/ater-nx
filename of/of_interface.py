@@ -24,34 +24,68 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from hal.brocade_hal import BrocadeHal
-from monitor.statistics_monitor import StatisticsMonitor
-from of.of_interface import OFHandler
+from abc import ABCMeta, abstractmethod
 
 
-class AppStart(OFHandler):
-    def __init__(self):
-        # Get type of hal from configuration file
-        self.hal = BrocadeHal()
+class OFObservable(object):
+    pass
 
-        # --------------------------------------
-        # Start class that use this hal
-        # --------------------------------------
-        # ::StatisticsMonitor::
-        self.stats_monitor = StatisticsMonitor(self.hal)
 
-    # ------ handler ---------
-    def switch_enter_handler(self, ev):
-        self.hal.switch_enter_handler(ev)
+class OFPacketIn(OFObservable):
+    __metaclass__ = ABCMeta
 
-    def switch_leave_handler(self, ev):
-        self.hal.switch_leave_handler(ev)
-
+    @abstractmethod
     def packet_in_handler(self, ev):
-        self.hal.packet_in_handler(ev)
+        return NotImplemented
 
+
+class OFDescStatsReply(OFObservable):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
     def desc_stats_reply_handler(self, ev):
-        self.hal.desc_stats_reply_handler(ev)
+        return NotImplemented
 
+
+class OFFlowRemoved(OFObservable):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
     def flow_removed_handler(self, ev):
-        self.hal.flow_removed_handler(ev)
+        return NotImplemented
+
+
+class OFSwitchEnter(OFObservable):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def switch_enter_handler(self, ev):
+        return NotImplemented
+
+
+class OFSwitchLeave(OFObservable):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def switch_leave_handler(self, ev):
+        return NotImplemented
+
+
+class OFHandler(OFPacketIn, OFDescStatsReply, OFFlowRemoved, OFSwitchEnter, OFSwitchLeave):
+    __metaclass__ = ABCMeta
+
+
+class OFSend(OFObservable):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def send_flow_mod(self, dp):
+        return NotImplemented
+
+    @abstractmethod
+    def send_desc_stats_request(self, dp):
+        return NotImplemented
+
+    @abstractmethod
+    def send_flow_stats_request(self, dp):
+        return NotImplemented

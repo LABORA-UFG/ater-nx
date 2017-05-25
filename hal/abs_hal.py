@@ -24,34 +24,51 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from hal.brocade_hal import BrocadeHal
-from monitor.statistics_monitor import StatisticsMonitor
-from of.of_interface import OFHandler
+from of.of_interface import *
 
 
-class AppStart(OFHandler):
+class AbsHal(OFSend, OFHandler):
+
     def __init__(self):
-        # Get type of hal from configuration file
-        self.hal = BrocadeHal()
+        self.observers = []
 
-        # --------------------------------------
-        # Start class that use this hal
-        # --------------------------------------
-        # ::StatisticsMonitor::
-        self.stats_monitor = StatisticsMonitor(self.hal)
+    def add_obs(self, observer):
+        assert isinstance(observer, OFObservable)
+        if observer not in self.observers:
+            self.observers.append(observer)
 
-    # ------ handler ---------
+    # --------- Send ----------
+    def send_flow_mod(self, dp):
+        pass
+
+    def send_flow_stats_request(self, dp):
+        pass
+
+    def send_desc_stats_request(self, dp):
+        pass
+
+    # --------- handler ----------
     def switch_enter_handler(self, ev):
-        self.hal.switch_enter_handler(ev)
+        for obs in self.observers:
+            if isinstance(obs, OFSwitchEnter):
+                obs.switch_enter_handler(ev)
 
     def switch_leave_handler(self, ev):
-        self.hal.switch_leave_handler(ev)
+        for obs in self.observers:
+            if isinstance(obs, OFSwitchLeave):
+                obs.switch_leave_handler(ev)
 
     def packet_in_handler(self, ev):
-        self.hal.packet_in_handler(ev)
+        for obs in self.observers:
+            if isinstance(obs, OFPacketIn):
+                obs.packet_in_handler(ev)
 
     def desc_stats_reply_handler(self, ev):
-        self.hal.desc_stats_reply_handler(ev)
+        for obs in self.observers:
+            if isinstance(obs, OFDescStatsReply):
+                obs.desc_stats_reply_handler(ev)
 
     def flow_removed_handler(self, ev):
-        self.hal.flow_removed_handler(ev)
+        for obs in self.observers:
+            if isinstance(obs, OFFlowRemoved):
+                obs.flow_removed_handler(ev)

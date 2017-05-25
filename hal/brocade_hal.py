@@ -23,32 +23,10 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from abc import ABCMeta, abstractmethod
+
+from abs_hal import AbsHal
 
 
-class OFInterface:
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def packet_in_handler(self, ev):
-        return NotImplemented
-
-    @abstractmethod
-    def send_flow_mod(self, dp):
-        return NotImplemented
-
-    @abstractmethod
-    def send_desc_stats_request(self, dp):
-        return NotImplemented
-
-    @abstractmethod
-    def desc_stats_reply_handler(self, ev):
-        return NotImplemented
-
-    @abstractmethod
-    def send_flow_stats_request(self, dp):
-        return NotImplemented
-
-    @abstractmethod
-    def flow_removed_handler(self, ev):
-        return NotImplemented
+class BrocadeHal(AbsHal):
+    def __init__(self):
+        super(BrocadeHal, self).__init__()

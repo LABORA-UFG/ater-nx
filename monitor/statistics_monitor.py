@@ -23,47 +23,20 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from rx import Observable
-from rx.subjects import Subject
 
-from of_interface import OFInterface
+from hal.abs_hal import AbsHal
+from of.of_interface import OFDescStatsReply
 
 
-class AbsHal(OFInterface):
+class StatisticsMonitor(OFDescStatsReply):
 
-    def __init__(self):
-        print 'AbsHal::init'
-        self.observer = Observable.create(self.__create_observer)
-        # self.stream = Subject()
+    def __init__(self, hal):
+        assert isinstance(hal, AbsHal)
 
-    def __create_observer(self, observer):
-        print 'AbsHal::__create_observer'
-        self.observer = observer
-
-    def add_subs(self, listener):
-        print 'AbsHal::__add_subs'
-        self.observer.subscribe(listener)
-        # self.stream.on_next(10)
-
-    def send(self):
-        print 'AbsHal::send'
-        self.observer.on_next('mess 1')
-        self.observer.on_next('mess 2')
-
-    def send_flow_mod(self, dp):
-        pass
-
-    def send_flow_stats_request(self, dp):
-        pass
-
-    def send_desc_stats_request(self, dp):
-        pass
+        self.hal = hal
+        # All classes that need to access an AbsHal to declare that it expects to receive the messages.
+        # These messages are sent from the OFObservable class they are inheriting.
+        self.hal.add_obs(self)
 
     def desc_stats_reply_handler(self, ev):
-        self.observer.on_next(ev)
-
-    def packet_in_handler(self, ev):
-        pass
-
-    def flow_removed_handler(self, ev):
-        pass
+        print "StatisticsMonitor::desc_stats_reply_handler", ev
